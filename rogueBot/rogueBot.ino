@@ -72,7 +72,7 @@ void game() {
     x -= cos30;
     y += 0.5;
   }
-  if ((carrier.Buttons.getTouch(TOUCH1) && carrier.Buttons.getTouch(TOUCH3)) || collision(x, y, 20, 20, 60, 60, 8)) {
+  if ((carrier.Buttons.getTouch(TOUCH1) && carrier.Buttons.getTouch(TOUCH3)) || collision(x, y, 20, 20, 60, 60, 6)) {
     clearPlayer(x, y);
     x = 0;
     y = 0;
@@ -105,9 +105,9 @@ void clearPlayer(double x, double y) {
 }
 
 void drawObstacle(double x0, double y0, double x1, double y1) {
-  carrier.display.fillRect(120 + x0, 120 - y0, x1 - x0, y1 - y0, 0b1111100000000000);
+  carrier.display.fillRect(120 + x0, 120 - y1, x1 - x0, y1 - y0, 0b1111100000000000);
 }
 
 bool collision(double playerX, double playerY, int x0, int y0, int x1, int y1, int w) {
-  return (x0-w < playerX) && (playerX < x1 + w) && (y0 - w < playerY) && (playerY < y1 + w);
+  return (x0 - w < playerX) && (playerX < x1 + w) && (y0 - w < playerY) && (playerY < y1 + w);
 }
