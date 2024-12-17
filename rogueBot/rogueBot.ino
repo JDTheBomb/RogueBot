@@ -122,6 +122,52 @@ class Player {
 };
 
 //Set non-constant game variables
+class obj{
+  public:
+    int x;
+    int y;
+    int health;
+    obj(int x=0, int y=0, int health=100){
+      this->x=x;
+      this->y=y;
+      this->health=health;
+    }
+};
+
+class Player: public obj{
+  Player(int x=0, int y=0, int health=100):obj(x,y, health){
+
+  }
+};
+
+
+class Enemy: public obj{
+  public:
+    int health;
+    Enemy(int x=0, int y=0, int health=100):obj(x,y, health){
+    }
+    void respawn(){
+
+    }
+    void move(){
+
+    }
+    void fire(){
+
+    }
+};
+double DistanceBetweenObj(const obj obj1, const obj obj2){
+  return sqrt(sq(obj1.x-obj2.x)+sq(obj1.y-obj2.y));
+};
+
+//const Enemies[] = {};
+Enemy enemy1(1,2);
+Enemy enemy2(4,5);
+
+double x = 0;
+double y = 0;
+int width = 10;
+int height = 10;
 int time = 0;
 
 Player player(0, 0, 10, 10);
@@ -130,6 +176,15 @@ std::list<Projectile> projs;
 
 //called repeatedly
 void loop() {
+  //Serial.println("test");
+  //Serial.println(enemy1.x);
+  //Serial.println(enemy1.y);
+  //Serial.println(enemy1.health);
+  //canvas.setTextSize(2);
+  //canvas.setTextColor(0x0000);  //set the text color as black
+  //canvas.setCursor(50, BACKGROUND); //set the cursor at position x=50, y=BACKGROUND
+  //canvas.print("Hello There!"); //display "Hello There!" on the screen
+
   carrier.Buttons.update();
 
   if (time == 0) {
