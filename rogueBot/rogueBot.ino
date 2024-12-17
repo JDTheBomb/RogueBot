@@ -1,4 +1,5 @@
 #include <Arduino_MKRIoTCarrier.h>
+#include <list>
 MKRIoTCarrier carrier;
 
 //Called on booting up
@@ -121,15 +122,14 @@ class Player {
 };
 
 //Set non-constant game variables
-double playerX = 0;
-double playerY = 0;
 int time = 0;
-Projectile proj1(0, 0, 35);
+
 Player player(0, 0, 10, 10);
+
+std::list<Projectile> projs;
 
 //called repeatedly
 void loop() {
-
   carrier.Buttons.update();
 
   if (time == 0) {
@@ -141,6 +141,8 @@ void loop() {
   if (time > 200) {
     game();
   }
+
+
 
   delay(10);
   time++;
@@ -156,14 +158,18 @@ void title() {
 
 void gameStart() {
   carrier.display.fillScreen(BACKGROUND);
+  projs.emplace_back(Projectile(0, 0, 30));
+  projs.emplace_back(Projectile(20, 20, -180));
 }
 
 void game() {
   player.draw();
   player.move();
 
-  proj1.draw();
-  proj1.move();
+  for (Projectile& proj : projs) {
+    proj.draw();
+    proj.move();
+  }
 }
 
 /*
