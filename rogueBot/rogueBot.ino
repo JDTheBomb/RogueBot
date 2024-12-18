@@ -19,47 +19,62 @@ const uint16_t sprite[] PROGMEM = {
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
 };
 
-class obj{
+class Sprite{
   public:
-    int x;
-    int y;
+    double x;
+    double y;
     int health;
-    obj(int x=0, int y=0, int health=100){
+    int attackDistance;
+    Sprite(double x=0, double y=0, int health=100, int attackDistance=30){
       this->x=x;
       this->y=y;
       this->health=health;
+      this->attackDistance=attackDistance;
     }
+    double DistanceToSprite(const Sprite sprite){
+      return sqrt(sq(this->x-sprite.x)+sq(this->y-sprite.y));
+    };
+
 };
-
-class Player: public obj{
-  Player(int x=0, int y=0, int health=100):obj(x,y, health){
-
-  }
-};
-
-
-class Enemy: public obj{
+class Player: public Sprite{
   public:
-    int health;
-    Enemy(int x=0, int y=0, int health=100):obj(x,y, health){
-    }
-    void respawn(){
+    Player(double x=0, int y=0, int health=100):Sprite(x, y, attackDistance, health){
 
+    }
+};
+
+
+class Enemy: public Sprite{
+  public:
+    Enemy(int x=0, int y=0, int attackDistance=0, int health=100):Sprite(x,y, attackDistance, health){
     }
     void move(){
-
+      //x += px * cos(angle);
+      //y += px * sin(angle);
     }
     void fire(){
 
     }
+    void attack(Player player, double px = 1){
+      if(this->DistanceToSprite(player)<= this->attackDistance){
+        fire();
+      }else{
+        double angle = atan2(player.y, player.x);
+        this->x += px * cos(angle);
+        this->y += px * sin(angle);
+        this->draw();
+      };
+    }
+    void draw(){
+      carrier.display.drawRGBBitmap(120 + this->x - 10 / 2, 120 - this->y - 10 / 2, sprite, 10, 10);
+    }
 };
-double DistanceBetweenObj(const obj obj1, const obj obj2){
-  return sqrt(sq(obj1.x-obj2.x)+sq(obj1.y-obj2.y));
-};
+
 
 //const Enemies[] = {};
 Enemy enemy1(1,2);
 Enemy enemy2(4,5);
+Player player1(0,0);
 
 double x = 0;
 double y = 0;
@@ -81,6 +96,7 @@ void setup() {
 }
 
 void loop() {
+  //enemy1.attack(player1);
   //Serial.println("test");
   //Serial.println(enemy1.x);
   //Serial.println(enemy1.y);
