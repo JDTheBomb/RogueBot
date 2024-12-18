@@ -36,19 +36,31 @@ const uint16_t sprite[] PROGMEM = {
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
 };
 
-//Projectile Class
-class Projectile {
+//Sprite Class
+class Sprite{
   public:
     double x;
     double y;
+    int health;
+    Sprite(double x=0, double y=0, int health=100) {
+      this->x=x;
+      this->y=y;
+      this->health=health;
+    };
+    double distanceTo(Sprite otherSprite){
+      return sqrt(sq(x-otherSprite.x) + sq(y-otherSprite.y));
+    };
+};
+
+//Projectile Class
+class Projectile: public Sprite {
+  public:
     double angle;
     double collisionRadius;
     double displayRadius;
     double color;
 
-    Projectile(double x, double y, double angle, double collisionRadius = 10, double displayRadius = 10, uint16_t color = 0b1111100000011111) {
-      this->x = x;
-      this->y = y;
+    Projectile(double x = 0, double y = 0, double angle = 0, double collisionRadius = 10, double displayRadius = 10, uint16_t color = 0b1111100000011111):Sprite(x, y) {
       this->angle = angle * PI / 180;
       this->collisionRadius = collisionRadius;
       this->displayRadius = displayRadius;
@@ -56,8 +68,8 @@ class Projectile {
     };
 
     void move(double px = 1) {
-      x += px * cos(angle);
-      y += px * sin(angle);
+      this->x += px * cos(angle);
+      this->y += px * sin(angle);
     };
 
     bool checkCollision() {
@@ -65,109 +77,84 @@ class Projectile {
     };
 
     bool onScreen() {
-      return (sq(x) + sq(y) < sq(128));
+      return (sq(this->x) + sq(this->y) < sq(128));
     };
 
     void draw() {
-      carrier.display.fillCircle(120 + x - cos(angle), 120 - y + sin(angle), displayRadius, BACKGROUND);
-      carrier.display.fillCircle(120 + x, 120 - y, displayRadius, color);
+      carrier.display.fillCircle(120 + this->x - cos(angle), 120 - this->y + sin(angle), displayRadius, BACKGROUND);
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, displayRadius, color);
     };
 
     void clear(double r) {
-      carrier.display.fillCircle(120 + x, 120 - y, r + 1, BACKGROUND);
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, r + 1, BACKGROUND);
     };
 };
 
 //Player Class
-class Player {
+class Player: public Sprite {
   public:
     double x;
     double y;
     double width;
     double height;
 
-    Player(double x, double y, double width, double height) {
-      this->x = x;
-      this->y = y;
+    Player(double x=0, double y=0, int health=100, double width = 10, double height = 10):Sprite(x,y,health){
       this->width = width;
       this->height = height;
     }
 
     void draw() {
-      carrier.display.drawRGBBitmap(120 + x - playerWidth / 2, 120 - y - playerHeight / 2, sprite, playerWidth, playerHeight);
+      carrier.display.drawRGBBitmap(120 + this->x - playerWidth / 2, 120 - this->y - playerHeight / 2, sprite, playerWidth, playerHeight);
     }
 
     void clear() {
-      carrier.display.fillRect(120 + x - playerWidth / 2, 120 - y - playerHeight / 2, 10, 10, BACKGROUND);
+      carrier.display.fillRect(120 + this->x - playerWidth / 2, 120 - this->y - playerHeight / 2, 10, 10, BACKGROUND);
     }
 
     void move() {
       if (carrier.Buttons.getTouch(TOUCH0)) {
-        x += cos30;
-        y += 0.5;
+        this->x += cos30;
+        this->y += 0.5;
       }
       if (carrier.Buttons.getTouch(TOUCH2)) {
-        y -= 1;
+        this->y -= 1;
       }
       if (carrier.Buttons.getTouch(TOUCH4)) {
-        x -= cos30;
-        y += 0.5;
+        this->x -= cos30;
+        this->y += 0.5;
       }
-      if (sq(x) + sq(y) >= sq(120)) {
+      if (sq(this->x) + sq(this->y) >= sq(120)) {
         this->clear();
-        x *= -.95;
-        y *= -.95;
+        this->x *= -.95;
+        this->y *= -.95;
       }
     }
 };
 
-//Set non-constant game variables
-class obj{
+
+class Enemy: public Sprite{
   public:
-    int x;
-    int y;
-    int health;
-    obj(int x=0, int y=0, int health=100){
-      this->x=x;
-      this->y=y;
-      this->health=health;
+    int animationState 
+    Enemy(int x=0, int y=0, int health=100):Sprite(x,y, health){
+    }
+    void move() {
+
+    }
+    void fire() {
+
+    }
+    void draw() {
+
+    }
+    void clear() {
+
     }
 };
 
-class Player: public obj{
-  Player(int x=0, int y=0, int health=100):obj(x,y, health){
+//Game Constants
 
-  }
-};
+//Enemy enemy2(4,5);
 
-
-class Enemy: public obj{
-  public:
-    int health;
-    Enemy(int x=0, int y=0, int health=100):obj(x,y, health){
-    }
-    void respawn(){
-
-    }
-    void move(){
-
-    }
-    void fire(){
-
-    }
-};
-double DistanceBetweenObj(const obj obj1, const obj obj2){
-  return sqrt(sq(obj1.x-obj2.x)+sq(obj1.y-obj2.y));
-};
-
-//const Enemies[] = {};
-Enemy enemy1(1,2);
-Enemy enemy2(4,5);
-
-double x = 0;
-double y = 0;
-int width = 10;
-int height = 10;
 int time = 0;
 
 Player player(0, 0, 10, 10);
