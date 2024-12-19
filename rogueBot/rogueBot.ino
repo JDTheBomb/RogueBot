@@ -10,6 +10,13 @@ void setup() {
 
   carrier.noCase();
   carrier.begin();
+
+  carrier.leds.setPixelColor(0, 255, 0, 0);
+  carrier.leds.setPixelColor(1, 255, 0, 0);
+  carrier.leds.setPixelColor(2, 255, 0, 0);
+  carrier.leds.setPixelColor(3, 255, 0, 0);
+  carrier.leds.setPixelColor(4, 255, 0, 0);
+  carrier.leds.show();
 }
 
 //Set math constants
@@ -102,12 +109,12 @@ class Projectile: public Sprite {
     };
 
     void draw() {
-      carrier.display.fillCircle(120 + this->x - cos(angle), 120 - this->y + sin(angle), displayRadius, BACKGROUND);
-      carrier.display.fillCircle(120 + this->x, 120 - this->y, displayRadius, color);
+      carrier.display.fillCircle(120 + this->x - cos(angle), 120 - this->y + sin(angle), this->displayRadius, BACKGROUND);
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, this->displayRadius, color);
     };
 
-    void clear(double r) {
-      carrier.display.fillCircle(120 + this->x, 120 - this->y, r + 1, BACKGROUND);
+    void clear() {
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, this->displayRadius, BACKGROUND);
     };
 };
 
@@ -146,7 +153,10 @@ class Player: public Sprite {
     }
     void loosehealth(int health){
       if(1<=this->health){
+        carrier.leds.setPixelColor(this->health-1, 0, 0, 0);
+        carrier.leds.show();
         this->health-=health;
+        
       }else{
         this->health=0;
       }
@@ -154,7 +164,7 @@ class Player: public Sprite {
 };
 
 //define player & projs; needed here because the enemy class directly references these objects.
-Player player(0, 0, 10, 10);
+Player player(0, 0, 5, 10);
 std::list<Projectile> projs;
 
 class Enemy: public Sprite{
@@ -274,12 +284,13 @@ void game() {
   for (std::list<Projectile>::iterator it = projs.begin(); it != projs.end(); ++it) {
     // Access the current projectile using (*it) or (it->)
     Projectile& proj = *it; // Get a reference for easier use
-    Serial.println(player.health);
+    //Serial.println(player.health);
     //Serial.println(proj.distanceTo(player));
     //Serial.println((player.height/2)+proj.collisionRadius);
     if (sq(proj.x) + sq(proj.y) <= sq(140)) {
       if(proj.distanceTo(player)<=(player.height/2)+proj.collisionRadius){
         player.loosehealth(proj.health);
+        proj.clear();
         projs.erase(it);
       }else{
         proj.draw();
