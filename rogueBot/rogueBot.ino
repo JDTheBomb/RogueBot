@@ -11,6 +11,14 @@ void setup() {
   carrier.noCase();
   carrier.begin();
 
+  if (!IMU.begin()) {
+    Serial.println("Failed to initialize IMU!");
+    while (1);
+  }
+  Serial.print("Accelerometer sample rate = ");
+  Serial.print(IMU.accelerationSampleRate());
+  Serial.println("Hz");
+
   carrier.leds.setPixelColor(0, 255, 0, 0);
   carrier.leds.setPixelColor(1, 255, 0, 0);
   carrier.leds.setPixelColor(2, 255, 0, 0);
@@ -32,6 +40,9 @@ const int playerHeight = 10;
 const int attackRadius = 40;
 
 const int fireRate = 100;
+float imuX=0;
+float imuY=0;
+float imuZ=0;
 
 //Set Sprite Data
 const uint16_t playerImg[] PROGMEM = {
@@ -88,7 +99,7 @@ class Projectile: public Sprite {
     double color;
     double displayRadius;
 
-    Projectile(double x = 0, double y = 0, double angle = 0, double health=1, double collisionRadius = 10, double displayRadius = 10, uint16_t color = 0b1111100000011111):Sprite(x, y, collisionRadius*2,collisionRadius*2,health) {
+    Projectile(double x = 0, double y = 0, double angle = 0, double health=-1, double collisionRadius = 10, double displayRadius = 10, uint16_t color = 0b1111100000011111):Sprite(x, y, collisionRadius*2,collisionRadius*2,health) {
       this->angle = angle * PI / 180;
       this->collisionRadius = collisionRadius;
       this->displayRadius = displayRadius;
@@ -151,11 +162,11 @@ class Player: public Sprite {
         this->y *= -.95;
       }
     }
-    void loosehealth(int health){
+    void changeHealth(int health){
       if(1<=this->health){
         carrier.leds.setPixelColor(this->health-1, 0, 0, 0);
         carrier.leds.show();
-        this->health-=health;
+        this->health+=health;
         
       }else{
         this->health=0;
@@ -171,7 +182,7 @@ class Enemy: public Sprite{
   public:
     int animationState;
     int delay;
-    Enemy(double x=0, double y=0, double width = 10, double height = 10, int delay = 0, int health=100):Sprite(x, y, width, height, health){
+    Enemy(double x=0, double y=0, double width = 10, double height = 10, int delay = 0, int health=1):Sprite(x, y, width, height, health){
     }
 
     void attack() {
@@ -281,6 +292,22 @@ void game() {
     };
     
   }*/
+  if(imuX <=-1.5 || 1.5<=imuX ||
+     imuY <=-1.5 || 1.5<=imuY ||
+     imuZ <=-1.5 || 1.5<=imuZ){
+    for (std::list<Enemy>::iterator it = enemies.begin(); it != enemies.end(); ++it) {
+      Enemy& enemy = *it;
+      if(player.distanceTo(enemy)<=20){
+        if(1<enemy.health){
+          enemy.health-=1;
+        }else{
+          enemy.clear();
+          enemies.erase(it);
+        }
+      }
+    }
+
+  }
   for (std::list<Projectile>::iterator it = projs.begin(); it != projs.end(); ++it) {
     // Access the current projectile using (*it) or (it->)
     Projectile& proj = *it; // Get a reference for easier use
@@ -289,7 +316,7 @@ void game() {
     //Serial.println((player.height/2)+proj.collisionRadius);
     if (sq(proj.x) + sq(proj.y) <= sq(140)) {
       if(proj.distanceTo(player)<=(player.height/2)+proj.collisionRadius){
-        player.loosehealth(proj.health);
+        player.changeHealth(proj.health);
         proj.clear();
         projs.erase(it);
       }else{
@@ -300,6 +327,13 @@ void game() {
       projs.erase(it);
     }
   }
+  if (IMU.accelerationAvailable()) {
+    IMU.readAcceleration(imuX, imuY, imuZ);
+  }
+  //Serial.println(imuX <=-1.5 || 1.5<=imuX);
+  //Serial.println(imuY <=-1.5 || 1.5<=imuY);
+  //Serial.println(imuZ <=-1.5 || 1.5<=imuZ);
+
 
   
   for (Enemy& enemy : enemies) {
