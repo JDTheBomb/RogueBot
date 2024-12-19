@@ -44,6 +44,18 @@ const uint16_t playerImg[] PROGMEM = {
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
 };
+const uint16_t playerAttackingImg[] PROGMEM = {
+  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
+};
 
 const uint16_t enemyImg[] PROGMEM = {
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
@@ -111,20 +123,26 @@ class Projectile: public Sprite {
       carrier.display.fillCircle(120 + this->x, 120 - this->y, displayRadius, color);
     };
 
-    void clear(double r) {
-      carrier.display.fillCircle(120 + this->x, 120 - this->y, r + 1, BACKGROUND);
+    void clear() {
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, displayRadius, BACKGROUND);
     };
 };
 
 //Player Class
 class Player: public Sprite {
   public:
+    int countdown = 0;
 
     Player(double x=0, double y=0, int health=100, double width = 10, double height = 10):Sprite(x,y,width,height,health){
     }
 
     void draw() {
-      carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerImg, this->width, this->height);
+      if (isAttacking()) {
+        carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerAttackingImg, this->width, this->height);
+      }
+      else {
+        carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerImg, this->width, this->height);
+      }
     }
 
     void clear() {
@@ -157,6 +175,14 @@ class Player: public Sprite {
         this->y -= 1.001 * sin(angleToOrigin);
         this->clearBorder();
       }
+      if (carrier.Buttons.getTouch(TOUCH3) && carrier.Buttons.getTouch(TOUCH1) && countdown < 0) {
+        countdown = 100;
+      }
+
+      countdown--;
+    }
+    bool isAttacking() {
+      return countdown >= 50;
     }
 };
 
@@ -186,6 +212,13 @@ class Enemy: public Sprite{
       if ((time - this->fireOffset) % fireRate == 0) {
         fire(angle, projs);
       }
+
+      if (this->distanceTo(player) < 10 && player.isAttacking()) {
+        this->delete;
+      }
+    }
+    void delete() {
+      
     }
 
     void fire(double angle, std::list<Projectile>& projs) {
