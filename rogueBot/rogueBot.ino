@@ -23,13 +23,18 @@ void setup() {
 const double root2 = sqrt(2);
 const double cos30 = sqrt(3) / 2;
 
+//math functions
+int sign(double x) {
+  return ((x > 0) - (x < 0)) / 2;
+}
+
 //Set game constants
 const uint16_t BACKGROUND = 0x1F;
 
 const int playerWidth = 10;
 const int playerHeight = 10;
 
-const int attackRadius = 40;
+const int attackRadius = 80;
 
 const int fireRate = 100;
 
@@ -44,6 +49,18 @@ const uint16_t playerImg[] PROGMEM = {
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
+};
+const uint16_t playerAttackingImg[] PROGMEM = {
+  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
+  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
 };
 
@@ -121,16 +138,25 @@ class Projectile: public Sprite {
 //Player Class
 class Player: public Sprite {
   public:
+    int countdown = 0;
 
-    Player(double x=0, double y=0, int health=5, double width = 10, double height = 10):Sprite(x,y,width,height,health){
+    Player(double x=0, double y=0, int health=100, double width = 10, double height = 10):Sprite(x,y,width,height,health){
     }
 
     void draw() {
-      carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerImg, this->width, this->height);
+      if (isAttacking()) {
+        carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerAttackingImg, this->width, this->height);
+      }
+      else {
+        carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, playerImg, this->width, this->height);
+      }
     }
 
     void clear() {
       carrier.display.fillRect(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, this->width, this->height, BACKGROUND);
+    }
+    void clearBorder() {
+      carrier.display.drawRect(120 + this->x - (this->width+2) / 2, 120 - this->y - (this->height+2) / 2, (this->width+2), (this->height+2), BACKGROUND);
     }
 
     void move() {
@@ -145,11 +171,25 @@ class Player: public Sprite {
         this->x -= cos30;
         this->y += 0.5;
       }
-      if (sq(this->x) + sq(this->y) >= sq(120)) {
+      if (sq(this->x) + sq(this->y) >= sq(115)) {
+        /*
         this->clear();
         this->x *= -.95;
         this->y *= -.95;
+        */
+        double angleToOrigin = atan2(this->y, this->x);
+        this->x -= 1.001 * cos(angleToOrigin);
+        this->y -= 1.001 * sin(angleToOrigin);
+        this->clearBorder();
       }
+      if (carrier.Buttons.getTouch(TOUCH3) && carrier.Buttons.getTouch(TOUCH1) && countdown < 0) {
+        countdown = 100;
+      }
+
+      countdown--;
+    }
+    bool isAttacking() {
+      return countdown >= 50;
     }
     void loosehealth(int health){
       if(1<=this->health){
@@ -163,48 +203,56 @@ class Player: public Sprite {
     }
 };
 
-//define player & projs; needed here because the enemy class directly references these objects.
-Player player(0, 0, 5, 10);
-std::list<Projectile> projs;
-
 class Enemy: public Sprite{
   public:
-    int animationState;
-    int delay;
-    Enemy(double x=0, double y=0, double width = 10, double height = 10, int delay = 0, int health=100):Sprite(x, y, width, height, health){
+    int fireOffset;
+
+    Enemy(double x=0, double y=0, int fireOffset = 0, double width = 10, double height = 10, int health=100):Sprite(x, y, width, height, health){
+      this->fireOffset = fireOffset;
     }
 
-    void attack() {
-      delay++;
-      double angleToPlayer = atan2(player.y - this->y, player.x - this-> x);
+    void attack(Player player, std::list<Projectile>& projs, int time) {
+      double angle = atan2(player.y - this->y, player.x - this-> x);
+      if (this->distanceTo(player) > attackRadius + 5) {
+        move(angle, .6);
+      }
       if (this->distanceTo(player) < attackRadius) {
-        if (delay % fireRate == 0) {
-          fire(angleToPlayer);
-        }
-      } else {
-        move(angleToPlayer);
+        move(angle, -.4);
+      }
+      if (sq(this->x) + sq(this->y) >= sq(115)) {
+        double angleToOrigin = atan2(this->y, this->x);
+        this->x -= 1.001 * cos(angleToOrigin);
+        this->y -= 1.001 * sin(angleToOrigin);
+        this->clearBorder();
+      }
+
+      if ((time - this->fireOffset) % fireRate == 0) {
+        fire(angle, projs);
+      }
+
+      if (this->distanceTo(player) < 10 && player.isAttacking()) {
+        this->delete;
       }
     }
+    void delete() {
+      
+    }
 
-    void fire(double angle) {
+    void fire(double angle, std::list<Projectile>& projs) {
       projs.emplace_back(Projectile(x, y, angle * 180 / PI));
     }
     
     void move(double angle, double px = 1) {
       this->x += px * cos(angle);
       this->y += px * sin(angle);
+
+    }
+
+    void clearBorder() {
+      carrier.display.drawRect(120 + this->x - (this->width+2) / 2, 120 - this->y - (this->height+2) / 2, (this->width+2), (this->height+2), BACKGROUND);
     }
 
     void draw() {
-      //Serial.print(120 + this->x - this->width / 2);
-      //Serial.print(" ");
-      //Serial.print(120 - this->y - this->height / 2);
-      //Serial.print(" ");
-      //Serial.print(this->width);
-      //Serial.print(" ");
-      //Serial.print(this->height);
-      //Serial.println();
-
       carrier.display.drawRGBBitmap(120 + this->x - this->width / 2, 120 - this->y - this->height / 2, enemyImg, this->width, this->height);
     }
 
@@ -213,19 +261,14 @@ class Enemy: public Sprite{
     }
 };
 
-//Game Constants
-
-//Enemy enemy2(4,5);
-
+////Game Variables
 int time = 0;
+Player player(0, 0, 10, 10);
+std::list<Projectile> projs;
 std::list<Enemy> enemies;
 
 //called repeatedly
 void loop() {
-  //Serial.println("test");
-  //Serial.println(enemy1.x);
-  //Serial.println(enemy1.y);
-  //Serial.println(enemy1.health);
   //canvas.setTextSize(2);
   //canvas.setTextColor(0x0000);  //set the text color as black
   //canvas.setCursor(50, BACKGROUND); //set the cursor at position x=50, y=BACKGROUND
@@ -259,7 +302,7 @@ void title() {
 
 void gameStart() {
   carrier.display.fillScreen(BACKGROUND);
-  enemies.emplace_back(Enemy());
+  enemies.emplace_back(Enemy(5));
   projs.emplace_back(Projectile(20, 20, -180));
 }
 
@@ -305,7 +348,19 @@ void game() {
   for (Enemy& enemy : enemies) {
     enemy.draw();
     enemy.attack();
+  /*
+  player.draw();
+  player.move();
+
+  for (Projectile& proj : projs) {
+    proj.draw();
+    proj.move();
   }
+  for (Enemy& enemy : enemies) {
+    enemy.draw();
+    enemy.attack(player, projs, time);
+  }
+  */
 }
 
 /*
