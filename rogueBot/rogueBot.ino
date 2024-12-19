@@ -2,6 +2,8 @@
 #include <list>
 MKRIoTCarrier carrier;
 
+int time = 0;
+
 //Called on booting up
 void setup() {
   Serial.begin(9600);
@@ -10,13 +12,6 @@ void setup() {
 
   carrier.noCase();
   carrier.begin();
-
-  carrier.leds.setPixelColor(0, 255, 0, 0);
-  carrier.leds.setPixelColor(1, 255, 0, 0);
-  carrier.leds.setPixelColor(2, 255, 0, 0);
-  carrier.leds.setPixelColor(3, 255, 0, 0);
-  carrier.leds.setPixelColor(4, 255, 0, 0);
-  carrier.leds.show();
 }
 
 //Set math constants
@@ -131,7 +126,7 @@ class Projectile: public Sprite {
     };
 
     void clear() {
-      carrier.display.fillCircle(120 + this->x, 120 - this->y, this->displayRadius, BACKGROUND);
+      carrier.display.fillCircle(120 + this->x, 120 - this->y, this->displayRadius + 1, BACKGROUND);
     };
 };
 
@@ -140,7 +135,13 @@ class Player: public Sprite {
   public:
     int countdown = 0;
 
-    Player(double x=0, double y=0, int health=100, double width = 10, double height = 10):Sprite(x,y,width,height,health){
+    Player(double x=0, double y=0, double width = 10, double height = 10, int health=5):Sprite(x,y,width,height,health){
+    }
+
+    void reset() {
+      this->x = 0;
+      this->y = 0;
+      this->health = 5;
     }
 
     void draw() {
@@ -182,7 +183,7 @@ class Player: public Sprite {
         this->y -= 1.001 * sin(angleToOrigin);
         this->clearBorder();
       }
-      if (carrier.Buttons.getTouch(TOUCH3) && carrier.Buttons.getTouch(TOUCH1) && countdown < 0) {
+      if (carrier.Buttons.getTouch(TOUCH3) || carrier.Buttons.getTouch(TOUCH1) && countdown < 0) {
         countdown = 100;
       }
 
@@ -191,14 +192,14 @@ class Player: public Sprite {
     bool isAttacking() {
       return countdown >= 50;
     }
-    void loosehealth(int health){
-      if(1<=this->health){
-        carrier.leds.setPixelColor(this->health-1, 0, 0, 0);
-        carrier.leds.show();
-        this->health-=health;
+    void looseHealth(int health){
+      carrier.leds.setPixelColor(5 - this->health, 0, 0, 0);
+      carrier.leds.show();
+      this->health-=health;
         
-      }else{
+      if (this->health == 0) {
         this->health=0;
+        time = -1;
       }
     }
 };
@@ -231,11 +232,8 @@ class Enemy: public Sprite{
       }
 
       if (this->distanceTo(player) < 10 && player.isAttacking()) {
-        this->delete;
+        //this->delete;
       }
-    }
-    void delete() {
-      
     }
 
     void fire(double angle, std::list<Projectile>& projs) {
@@ -262,7 +260,6 @@ class Enemy: public Sprite{
 };
 
 ////Game Variables
-int time = 0;
 Player player(0, 0, 10, 10);
 std::list<Projectile> projs;
 std::list<Enemy> enemies;
@@ -278,6 +275,26 @@ void loop() {
 
   if (time == 0) {
     title();
+  }
+  if (time == 50) {
+    carrier.leds.setPixelColor(4, 10, 0, 0);
+    carrier.leds.show();
+  }
+  if (time == 80) {
+    carrier.leds.setPixelColor(3, 10, 0, 0);
+    carrier.leds.show();
+  }
+  if (time == 110) {
+    carrier.leds.setPixelColor(2, 10, 0, 0);
+    carrier.leds.show();
+  }
+  if (time == 140) {
+    carrier.leds.setPixelColor(1, 10, 0, 0);
+    carrier.leds.show();
+  }
+  if (time == 170) {
+    carrier.leds.setPixelColor(0, 10, 0, 0);
+    carrier.leds.show();
   }
   if (time == 200) {
     gameStart();
@@ -302,6 +319,9 @@ void title() {
 
 void gameStart() {
   carrier.display.fillScreen(BACKGROUND);
+  projs.clear();
+  enemies.clear();
+  player.reset();
   enemies.emplace_back(Enemy(5));
   projs.emplace_back(Projectile(20, 20, -180));
 }
@@ -311,56 +331,34 @@ void game() {
   player.draw();
   player.move();
 
-  /*
-  for (Projectile& proj : projs) {
-    Serial.println(player.health);
-    //Serial.println(proj.distanceTo(player));
-    //Serial.println((player.height/2)+proj.collisionRadius);
-    if(proj.distanceTo(player)<=(player.height/2)+proj.collisionRadius){
-      player.loosehealth(proj.health);
-    }else{
-      proj.draw();
-      proj.move();
-    };
-    
-  }*/
-  for (std::list<Projectile>::iterator it = projs.begin(); it != projs.end(); ++it) {
-    // Access the current projectile using (*it) or (it->)
-    Projectile& proj = *it; // Get a reference for easier use
-    //Serial.println(player.health);
-    //Serial.println(proj.distanceTo(player));
-    //Serial.println((player.height/2)+proj.collisionRadius);
-    if (sq(proj.x) + sq(proj.y) <= sq(140)) {
-      if(proj.distanceTo(player)<=(player.height/2)+proj.collisionRadius){
-        player.loosehealth(proj.health);
-        proj.clear();
-        projs.erase(it);
-      }else{
-        proj.draw();
-        proj.move();
-      };
-    }else{
-      projs.erase(it);
-    }
-  }
-
   
-  for (Enemy& enemy : enemies) {
-    enemy.draw();
-    enemy.attack();
-  /*
-  player.draw();
-  player.move();
-
   for (Projectile& proj : projs) {
     proj.draw();
     proj.move();
+
+    if(proj.distanceTo(player)<=(player.height/2)+proj.collisionRadius){
+      player.looseHealth(1);
+      proj.clear();
+    }
   }
+
+  projs.remove_if([] (Projectile& proj) {
+    return (proj.distanceTo(player) <= (player.height/2)+proj.collisionRadius) || (sq(proj.x) + sq(proj.y) > sq(140));
+  });
+
   for (Enemy& enemy : enemies) {
     enemy.draw();
     enemy.attack(player, projs, time);
+
+    if ((enemy.distanceTo(player) <= (player.height/2)+enemy.width) && player.isAttacking()) {
+      enemy.clear();
+    }
   }
-  */
+
+  enemies.remove_if([] (Enemy& enemy) {
+    return (enemy.distanceTo(player) <= (player.height/2)+enemy.width) && player.isAttacking();
+  });
+
 }
 
 /*
