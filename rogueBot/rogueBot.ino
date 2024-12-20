@@ -10,6 +10,15 @@ void setup() {
 
   carrier.noCase();
   carrier.begin();
+
+
+  if (!IMU.begin()) {
+    Serial.println("Failed to initialize IMU!");
+    while (1);
+  }
+  Serial.print("Accelerometer sample rate = ");
+  Serial.print(IMU.accelerationSampleRate());
+  Serial.println("Hz");
 }
 
 //set colors
@@ -38,7 +47,7 @@ int sign(double x) {
 
 //player
 const int playerWidth = 19;
-const int playerHeight = 19;
+const int playerHeight = 14;
 
 //enemy
 const int enemyHeight = 20;
@@ -51,6 +60,10 @@ const int enemySpawnDistance = 80;
 const int projCollisionRadius = 4;
 const int projDisplayRadius = 4;
 const uint16_t projColor = 0b1111100000011111;
+
+float imuX=0;
+float imuY=0;
+float imuZ=0;
 
 //Img data ------------------------------------------
 /*
@@ -104,18 +117,22 @@ const uint16_t playerImg[] PROGMEM = {
   BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
   BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
   BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
-}
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+};
 const uint16_t playerAttackingImg[] PROGMEM = {
-  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
-  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
-  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
-  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
-  BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
-  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
-  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
-  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
-  BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, BACKGROUND,
-  BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, RED__, RED__, RED__, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, RED__, RED__, RED__, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, RED__, RED__, RED__, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, RED__, RED__, RED__, RED__, RED__, RED__, RED__, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BACK_, BACK_, BACK_, BACK_,
 };
 const uint16_t enemyImgLeft[] PROGMEM = {
   BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
@@ -267,7 +284,9 @@ class Player: public Sprite {
         this->y -= 1.001 * sin(angleToOrigin);
         this->clearBorder();
       }
-      if (carrier.Buttons.getTouch(TOUCH3) || carrier.Buttons.getTouch(TOUCH1) && countdown < 0) {
+      if(imuX <=-1.4 || 1.4<=imuX ||
+         imuY <=-1.4 || 1.4<=imuY ||
+         imuZ <=-1.4 || 1.4<=imuZ){
         countdown = 100;
       }
 
@@ -395,7 +414,7 @@ class Enemy: public Sprite{
 //Game Variables -----------------------------------------
 int time = 0;
 bool respawn = false;
-int level = 3; //CHANGE TO ZERO
+int level = 0; //CHANGE TO ZERO
 Player player(0, 0);
 std::list<Projectile> projs;
 std::list<Enemy> enemies;
@@ -504,7 +523,7 @@ void game() {
   }
 
   projs.remove_if([] (Projectile& proj) {
-    return (proj.distanceTo(player) <= (player.height/2)+projCollisionRadius) || (sq(proj.x) + sq(proj.y) > sq(140));
+    return (proj.distanceTo(player) <= (player.width/2)+projCollisionRadius) || (sq(proj.x) + sq(proj.y) > sq(140));
   });
 
   for (Enemy& enemy : enemies) {
@@ -527,6 +546,9 @@ void game() {
     return;
   }
 
+  if (IMU.accelerationAvailable()) {
+    IMU.readAcceleration(imuX, imuY, imuZ);
+  }
 }
 
 /*
