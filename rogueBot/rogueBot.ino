@@ -37,8 +37,8 @@ int sign(double x) {
 //Set game constants----------------------------------------
 
 //player
-const int playerWidth = 10;
-const int playerHeight = 10;
+const int playerWidth = 19;
+const int playerHeight = 19;
 
 //enemy
 const int enemyHeight = 20;
@@ -53,6 +53,7 @@ const int projDisplayRadius = 4;
 const uint16_t projColor = 0b1111100000011111;
 
 //Img data ------------------------------------------
+/*
 const uint16_t playerImg[] PROGMEM = {
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
@@ -65,6 +66,45 @@ const uint16_t playerImg[] PROGMEM = {
   BACKGROUND, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b1111111111100000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND
 };
+*/
+/*
+const uint16_t playerImg[] PROGMEM = {
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, GRAY_, GRAY_, YELOW, YELOW, BLACK, BLACK, YELOW, YELOW, BLACK, BLACK, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, GRAY_, BACK_, GRAY_, YELOW, YELOW, BLACK, BLACK, YELOW, YELOW, BLACK, BLACK, GRAY_, GRAY_, BACK_, GRAY_, BACK_, BACK_,
+  BACK_, BACK_, GRAY_, BACK_, GRAY_, YELOW, YELOW, BLACK, BLACK, YELOW, YELOW, BLACK, BLACK, GRAY_, GRAY_, BACK_, GRAY_, BACK_, BACK_,
+  BACK_, BACK_, GRAY_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, GRAY_, BACK_, BACK_,
+  BACK_, BACK_, GRAY_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, GRAY_, BACK_, BACK_,
+  BACK_, GRAY_, BACK_, GRAY_, BACK_, BACK_, BACK_, BACK_, ORNGE, YELOW, ORNGE, BACK_, BACK_, BACK_, BACK_, GRAY_, BACK_, GRAY_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, ORNGE, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+};
+*/
+const uint16_t playerImg[] PROGMEM = {
+  BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, BLACK, BLACK, BLACK, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, RED__, RED__, RED__, RED__, RED__, RED__, RED__, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, GRAY_, BACK_, BACK_, BACK_, BACK_,
+}
 const uint16_t playerAttackingImg[] PROGMEM = {
   BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND, BACKGROUND,
   BACKGROUND, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000011111111111, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, 0b0000000000000000, BACKGROUND,
@@ -118,7 +158,7 @@ const uint16_t enemyImgRight[] PROGMEM = {
   BACK_, BACK_, BLACK, BLACK, BACK_, BLACK, BLACK, BACK_, BACK_,
   BACK_, BACK_, BLACK, BLACK, BACK_, BLACK, BLACK, BACK_, BACK_,
   BACK_, BACK_, BROWN, BROWN, BACK_, BLACK, BLACK, BACK_, BACK_,
-  BACK_, BACK_, BLACK, BLACK, BACK_, BROWN, BROWN, BACK_, BACK_,
+  BACK_, BACK_, BACK_, BACK_, BACK_, BROWN, BROWN, BACK_, BACK_,
   BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_, BACK_,
 };
 const uint16_t enemyImgStill[] PROGMEM = {
@@ -295,17 +335,17 @@ class Enemy: public Sprite{
 
       //movement code
       if (dist > enemyRadius + 5) {
-        this->move(angle, .6);
+        this->moveToPlayer(player, .6);
         moving = true;
       } else if (dist < enemyRadius) {
-        this->move(angle, -.4);
+        this->moveToPlayer(player, -.4);
         moving = true;
       } else {
         moving = false;
       }
 
       if (sq(this->x) + sq(this->y) >= sq(115)) {
-        move(atan2(this->y, this->x), -1.001);
+        this->move(angle, 1.001);
         this->clearBorder();
       }
       
@@ -323,6 +363,12 @@ class Enemy: public Sprite{
       double normalizer = px * sqrt(sq(x) + sq(y));
       this-> x += x * normalizer;
       this-> y += y * normalizer;
+    }
+    void moveToPlayer(Player player, double px = 1) {
+      double dist = this->distanceTo(player);
+      //double normalizer = px * sqrt(sq(x) + sq(y));
+      this->x += (player.x - this->x) * px / dist;
+      this->y += (player.y - this->y) * px / dist;
     }
 
     void clearBorder() {
@@ -349,7 +395,7 @@ class Enemy: public Sprite{
 //Game Variables -----------------------------------------
 int time = 0;
 bool respawn = false;
-int level = 0;
+int level = 3; //CHANGE TO ZERO
 Player player(0, 0);
 std::list<Projectile> projs;
 std::list<Enemy> enemies;
